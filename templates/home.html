@@ -17,43 +17,84 @@
       {% if object_list %}
       <section class="border p-4 mb-4">
         <div class="input-group mb-4">
-          <input type="text" class="form-control" id="searchField" placeholder="Search by any keywords (Icontains advance search)" >
+          <input type="text" class="form-control" id="searchField" placeholder="Search by any keywords from this table (Icontains advance search)" >
         </div>
   
         <div id="datatable-advanced-search" class="datatable">
           <div class="datatable-inner table-responsive ps" style="overflow: auto; position: relative;">
-            
-            <table class="table datatable-table">
-              <thead class="datatable-header">
-                <tr>
-                  <th style="text-align: center;">SL. No</th>
-                  <th style="text-align: center;"></i> Title</th>
-                  <th style="text-align: center;"> Unit Price</th>
-                  <th style="text-align: center;"> Current stock</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                
-                {% for item in object_list %}
-                <tr scope="row">
-                  <td style="text-align: center;" >{{item.id}}</td>
-                  <td style="text-align: center;" >{{item.title}}</td>
-                  <td style="text-align: center;" >{{item.price}}</td>
-                  <td style="text-align: center;" >{{item.current_stock}}</td>
-                  <td style="text-align: right;"><a href="{{item.get_add_to_cart_url}}" class="btn btn-sm btn-secondary">Add to cart <i class="fas fa-shopping-cart ml-1"></i></a></td>
-                  <td style="text-align: right;"><a href="{{item.get_absolute_url}}" class="btn btn-sm btn-info">Details</a></td>
-                  <td style="text-align: right;"><a href="{% url 'ecommerce:product-delete' item.id %}" class="btn btn-sm btn-danger">Delete</a></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            
+            <!--Main Table start -->
+            <div class="main-table">
+              <table class="table datatable-table">
+                <thead class="datatable-header">
+                  <tr>
+                    <th style="text-align: center;">SL. No</th>
+                    <th style="text-align: center;"></i> Title</th>
+                    <th style="text-align: center;"> Unit Price</th>
+                    <th style="text-align: center;"> Current stock</th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  
+                  {% for item in object_list %}
+                  <tr scope="row">
+                    <td style="text-align: center;" >{{item.id}}</td>
+                    <td style="text-align: center;" >{{item.title}}</td>
+                    <td style="text-align: center;" >{{item.price}}</td>
+                    <td style="text-align: center;" >{{item.current_stock}}</td>
+                    <td style="text-align: right;"><a href="{{item.get_add_to_cart_url}}" class="btn btn-sm btn-secondary">Add to cart <i class="fas fa-shopping-cart ml-1"></i></a></td>
+                    <td style="text-align: right;"><a href="{{item.get_absolute_url}}" class="btn btn-sm btn-info">Details</a></td>
+                    <td style="text-align: right;"><a href="{% url 'ecommerce:product-delete' item.id %}" class="btn btn-sm btn-danger">Delete</a></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!--Main Table start -->
+            <!--Search Table start -->
+            <p class="no-result" style="display: none;">No search result</p>
+            <div class="search-table" style="display: none;">
+              <table class="table datatable-table">
+                <thead class="datatable-header">
+                  <tr>
+                    <th style="text-align: center;">SL. No</th>
+                    <th style="text-align: center;"></i> Title</th>
+                    <th style="text-align: center;"> Unit Price</th>
+                    <th style="text-align: center;"> Current stock</th>
+                    <th></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody class="search-table-body">
+
+                </tbody>
+              </table>
+            </div>
+            <!--Search Table end -->
           </div>
         </div>
       </section>
         <!--Section: Products Display-->
+        <!-- pagination start -->
+        <div class="pagination-container">
+          <div>
+              Showing page {{page_obj.number}} of {{page_obj.paginator.num_pages}}
+              <ul class="pagination align-right float-right mr-auto">
+                {% if page_obj.has_previous %}
+                    <li {% if page_obj.number %} class="page-item active" {% endif %}> <a class="page-link" href="?page=1">&laquo; 1</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number}}">Previous</a></li>
+                {% endif %}
+  
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{page_obj.next_page_number}}">Next</a></li>
+                    <li class="page-item active" ><a class="page-link" href="?page={{page_obj.paginator.num_pages}}">{{page_obj.paginator.num_pages}} &raquo;</a></li>
+                {% endif %}
+            </ul>
+          </div>
+          
+        </div>
+      <!-- pagination end -->
       {% else %}
         <p style="text-align: center;">You have not enough products to display</p>
       {% endif %}

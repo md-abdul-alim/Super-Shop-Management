@@ -7,6 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, View
 from .models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile
 from .forms import CheckoutForm, CouponForm, RefundForm, PaymentForm
+import json
+from django.http import JsonResponse, HttpResponse
 # Create your views here.
 # payment link: https://stripe.com/docs/api/charges/create?lang=python
 from django.conf import settings
@@ -38,6 +40,17 @@ def products(request):
     }
     return render(request, "products.html", content)
 
+@login_required(login_url='login')
+def search_expenses(request):
+    if request.method == 'POST':
+        search_str = json.loads(request.body).get('searchText')
+        items = Item.objects.filter(
+            title__icontains=search_str) | Item.objects.filter(
+            price__icontains=search_str) | Item.objects.filter(
+            current_stock__istartswith=search_str) | Item.objects.filter(
+            id__istartswith=search_str)
+        data = items.values()
+        return JsonResponse(list(data), safe=False)
 
 class HomeView(ListView):
     model = Item

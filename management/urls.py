@@ -1,6 +1,8 @@
 from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
 from .views import (
     HomeView,
+    search_expenses,
     ItemDetailView,
     product_delete,
     CheckoutView,
@@ -27,5 +29,7 @@ urlpatterns = [
     path('remove-single-item-from-cart/<slug>/', remove_single_item_from_cart, name='remove-single-item-from-cart'),
     path('payment/<payment_option>/',PaymentView.as_view(), name='payment'),
     path('add-coupon/', AddCouponView.as_view(), name='add-coupon'),
-    path('request-refund/',RequestRefundView.as_view(), name='request-refund')
+    path('request-refund/',RequestRefundView.as_view(), name='request-refund'),
+    path('search-expenses/', csrf_exempt(search_expenses),
+         name="search-expenses"),
 ]
