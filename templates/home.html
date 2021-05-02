@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% if request.user.is_authenticated %}
+  <!--Main layout-->
+  <main>
+    <div class="container">
+
+      <!--Navbar-->
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark lighten-3 mt-3 mb-5">
+        <span class="navbar-brand" style="text-align: center;">Products List</span>
+      </nav>
+      <!--/.Navbar-->
+
+      <!--Section: Products Display-->
+      {% if object_list %}
+      <section class="border p-4 mb-4">
+        <div class="input-group mb-4">
+          <input type="text" class="form-control" id="searchField" placeholder="Search by any keywords (Icontains advance search)" >
+        </div>
+  
+        <div id="datatable-advanced-search" class="datatable">
+          <div class="datatable-inner table-responsive ps" style="overflow: auto; position: relative;">
+            
+            <table class="table datatable-table">
+              <thead class="datatable-header">
+                <tr>
+                  <th style="text-align: center;">SL. No</th>
+                  <th style="text-align: center;"></i> Title</th>
+                  <th style="text-align: center;"> Unit Price</th>
+                  <th style="text-align: center;"> Current stock</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% for item in object_list %}
+                <tr scope="row">
+                  <td style="text-align: center;" >{{item.id}}</td>
+                  <td style="text-align: center;" >{{item.title}}</td>
+                  <td style="text-align: center;" >{{item.price}}</td>
+                  <td style="text-align: center;" >{{item.current_stock}}</td>
+                  <td style="text-align: right;"><a href="{{item.get_add_to_cart_url}}" class="btn btn-sm btn-secondary">Add to cart <i class="fas fa-shopping-cart ml-1"></i></a></td>
+                  <td style="text-align: right;"><a href="{{item.get_absolute_url}}" class="btn btn-sm btn-info">Details</a></td>
+                  <td style="text-align: right;"><a href="{% url 'ecommerce:product-delete' item.id %}" class="btn btn-sm btn-danger">Delete</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            
+          </div>
+        </div>
+      </section>
+        <!--Section: Products Display-->
+      {% else %}
+        <p style="text-align: center;">You have not enough products to display</p>
+      {% endif %}
+    </div>
+  </main>
+  <!--Main layout-->
+{% else %}
+  <!--Main layout-->
+
+  <!--Main layout-->
+{% endif %}
+
+<script src="{% static 'js/searchExpenses.js' %}"></script>
+{% endblock content %}
