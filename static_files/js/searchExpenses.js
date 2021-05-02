@@ -42,7 +42,7 @@ searchField.addEventListener('keyup', (e)=>{
                             <td style="text-align: center;">${item.price}</td>
                             <td style="text-align: center;">${item.current_stock}</td>
                             <td style="text-align: right;"><a href="{% url 'ecommerce:add-to-cart' ${item.slug} %}" class="btn btn-sm btn-secondary">Add to cart <i class="fas fa-shopping-cart ml-1"></i></a></td>
-                            <td style="text-align: right;"><a href="{% url 'ecommerce:product' ${item.slug} %}" class="btn btn-sm btn-info">Details</a></td>
+                            <td style="text-align: right;"><a href="{% url 'ecommerce:product' item.slug %}" class="btn btn-sm btn-info">Details</a></td>
                             <td style="text-align: right;"><a href="{% url 'ecommerce:product-delete' ${item.id} %}" class="btn btn-sm btn-danger">Delete</a></td>
                         </tr>
                     `;

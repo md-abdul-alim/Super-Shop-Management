@@ -120,11 +120,9 @@ def remove_to_cart(request, slug):
             messages.info(request, "This item was removed from your cart.")
             return redirect("ecommerce:order-summary")
         else:
-            # add a message saying the user doesnot have an order
             messages.info(request, "This item was not in your cart.")
             return redirect("ecommerce:product", slug=slug)
     else:
-        # add a message saying the user doesnot have an order
         messages.info(request, "You do not have an active order.")
         return redirect("ecommerce:product", slug=slug)
 
@@ -338,15 +336,15 @@ class CheckoutView(View):
                 payment_option = form.cleaned_data.get('payment_option')
 
                 if payment_option == 'S':
-                    return redirect('ecommerce:payment', payment_option='stripe')
+                    return redirect('ecommerce:payment')
                 elif payment_option == 'P':
-                    return redirect('ecommerce:payment', payment_option='paypal')
+                    return redirect('ecommerce:payment')
                 elif payment_option == 'N':
-                    return redirect('ecommerce:payment', payment_option='nagad')
+                    return redirect('ecommerce:payment')
                 elif payment_option == 'B':
-                    return redirect('ecommerce:payment', payment_option='bkash')
+                    return redirect('ecommerce:payment')
                 elif payment_option == 'R':
-                    return redirect('ecommerce:payment', payment_option='rocket')
+                    return redirect('ecommerce:payment')
                 else:
                     messages.warning(
                         self.request, "Invalid payment option selected")
@@ -368,19 +366,7 @@ class PaymentView(View):
             }
             # https://stackoverflow.com/questions/36317816/relatedobjectdoesnotexist-user-has-no-userprofile
             userprofile, created = UserProfile.objects.get_or_create(user=self.request.user)
-            if userprofile.one_click_purchasing:
-                # fetch the users card list
-                cards = stripe.Customer.list_sources(
-                    userprofile.stripe_customer_id,
-                    limit=3,
-                    object='card'
-                )
-                card_list = cards['data']
-                if len(card_list) > 0:
-                    # update the context with the default card
-                    context.update({
-                        'card': card_list[0]
-                    })
+
             return render(self.request, "payment.html", context)
         else:
             messages.warning(
@@ -389,10 +375,18 @@ class PaymentView(View):
 
     # details about decoupling: https://pypi.org/project/python-decouple/
     # FOLLOW THIS LINK FOR decouple setup : https://www.youtube.com/watch?v=NRf1LeQju2g&ab_channel=ProfessionalCipher
-    def post(self, *args, **kwargs):
+    def post(self, request):
+        print("OK")
         order = Order.objects.get(user=self.request.user, ordered=False)
         form = PaymentForm(self.request.POST)
+        payment = Payment
+        
         userprofile = UserProfile.objects.get(user=self.request.user)
+        print(userprofile)
+
+        if request.method == 'POST':
+            print(request.POST['cardNumber'])
+            payment.stripe_charge_id = request.POST['cardNumber']
 
         if form.is_valid():
             token = form.cleaned_data.get('stripeToken')
