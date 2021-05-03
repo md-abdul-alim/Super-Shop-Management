@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Item, Order, OrderItem, Payment, Coupon, Refund, Address, UserProfile
+from .models import Item, Order, OrderItem, Payment, Coupon,Address, UserProfile, QrCode
 # Register your models here.
 
 
@@ -58,3 +58,4 @@ admin.site.register(Payment)
 admin.site.register(Coupon)
 admin.site.register(Address, AddressAdmin)
 admin.site.register(UserProfile)
+admin.site.register(QrCode)
