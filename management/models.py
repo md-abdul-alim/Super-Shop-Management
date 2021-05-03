@@ -205,7 +205,9 @@ class QrCode(models.Model):
         return str(self.name)
 
     '''
-    First on also work but can not control for more data. it a problem of Pillow. https://github.com/odoo/odoo/issues/14927
+        First on also work but can not control for more data. it a problem of Pillow.
+        Link 1: https://github.com/odoo/odoo/issues/14927
+        Link 2: https://stackoverflow.com/questions/65137142/valueerror-cannot-determine-region-size-use-4-item-box
     '''
     # def save(self, *args, **kwargs):
     #     qrcode_img = qrcode.make(self.name)
@@ -219,19 +221,22 @@ class QrCode(models.Model):
     #     canvas.close()
     #     super().save(*args, **kwargs)
 
+    '''
+        https://pypi.org/project/qrcode/
+    '''
     def save(self, *args, **kwargs):
         qr = qrcode.QRCode(
-            version=5,
+            version=5, # Control image size
             error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=5,
+            box_size=5, # Control image size
             border=3, # This control the outside padding of the image
         )
         qr.add_data(self.name)
-        qr.make(fit=False)
+        qr.make(fit=False) # fit False stop system to fix image size it own.This is shortcut way. For advance control use [image_factory]
         img = qr.make_image(fill_color="black", back_color="white")
-        fname = f'qr_code - {self.name}.png'
+        file_name = f'qr_code - {self.name}.png'
         buffer = BytesIO()
         img.save(buffer, 'PNG')
-        self.qr_code.save(fname, File(buffer), save = False)
+        self.qr_code.save(file_name, File(buffer), save = False)
         img.close()
         super().save(*args, **kwargs)
