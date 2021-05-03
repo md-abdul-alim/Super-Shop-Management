@@ -198,14 +198,14 @@ class Refund(models.Model):
         return f"{self.pk}"
 
 class QrCode(models.Model):
-    name = models.CharField(max_length=500)
+    name = models.CharField(max_length=255)
     qr_code = models.ImageField(upload_to = 'qr_codes', blank=True)
 
     def __str__(self):
         return str(self.name)
 
     '''
-    First on also work but can not control more data
+    First on also work but can not control for more data. it a problem of Pillow. https://github.com/odoo/odoo/issues/14927
     '''
     # def save(self, *args, **kwargs):
     #     qrcode_img = qrcode.make(self.name)
@@ -221,13 +221,13 @@ class QrCode(models.Model):
 
     def save(self, *args, **kwargs):
         qr = qrcode.QRCode(
-            version=1,
+            version=5,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
-            border=4,
+            box_size=5,
+            border=4, # This control the outside padding of the image
         )
         qr.add_data(self.name)
-        qr.make(fit=True)
+        qr.make(fit=False)
         img = qr.make_image(fill_color="black", back_color="white")
         fname = f'qr_code - {self.name}.png'
         buffer = BytesIO()
