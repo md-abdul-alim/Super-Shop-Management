@@ -198,7 +198,7 @@ class Refund(models.Model):
         return f"{self.pk}"
 
 class QrCode(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=500)
     qr_code = models.ImageField(upload_to = 'qr_codes', blank=True)
 
     def __str__(self):
@@ -207,16 +207,31 @@ class QrCode(models.Model):
     '''
     First on also work but can not control more data
     '''
+    # def save(self, *args, **kwargs):
+    #     qrcode_img = qrcode.make(self.name)
+    #     canvas = Image.new('RGB', (400, 400), 'white')
+    #     draw = ImageDraw.Draw(canvas)
+    #     canvas.paste(qrcode_img)
+    #     fname = f'qr_code - {self.name}.png'
+    #     buffer = BytesIO()
+    #     canvas.save(buffer, 'PNG')
+    #     self.qr_code.save(fname, File(buffer), save = False)
+    #     canvas.close()
+    #     super().save(*args, **kwargs)
+
     def save(self, *args, **kwargs):
-        qrcode_img = qrcode.make(self.name)
-        canvas = Image.new('RGB', (400, 400), 'white')
-        draw = ImageDraw.Draw(canvas)
-        canvas.paste(qrcode_img)
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(self.name)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
         fname = f'qr_code - {self.name}.png'
         buffer = BytesIO()
-        canvas.save(buffer, 'PNG')
+        img.save(buffer, 'PNG')
         self.qr_code.save(fname, File(buffer), save = False)
-        canvas.close()
+        img.close()
         super().save(*args, **kwargs)
-
-    
