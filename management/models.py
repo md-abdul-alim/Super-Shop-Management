@@ -224,7 +224,7 @@ class QrCode(models.Model):
             version=5,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=5,
-            border=4, # This control the outside padding of the image
+            border=3, # This control the outside padding of the image
         )
         qr.add_data(self.name)
         qr.make(fit=False)
