@@ -57,6 +57,11 @@ class HomeView(ListView):
     paginate_by = 4
     template_name = "home.html"
 
+class InvoiceView(ListView):
+    model = Item
+    paginate_by = 4
+    template_name = "invoice.html"
+
 
 class ItemDetailView(DetailView):
     model = Item
@@ -77,7 +82,7 @@ def add_to_cart(request, slug):
         user=request.user,
         ordered=False
     )
-    
+
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
@@ -411,21 +416,11 @@ class PaymentView(View):
             order.save()
 
             messages.success(self.request, "Your order was successful!")
-            return redirect("/")
+            return redirect("ecommerce:invoice")
             # error end
         else:
             messages.warning(self.request, "Invalid data received")
             return redirect("/")
-
-
-def get_coupon(request, code):
-    try:
-        coupon = Coupon.objects.get(code=code)
-        return coupon
-    except ObjectDoesNotExist:
-        messages.warning(request, "This coupon does not exist.")
-        return redirect("ecommerce:checkout")
-
 
 class AddCouponView(View):
     def post(self, *args, **kwargs):

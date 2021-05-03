@@ -11,6 +11,7 @@ from .views import (
     OrderSummaryView,
     remove_single_item_from_cart,
     PaymentView,
+    InvoiceView,
     AddCouponView,
     RequestRefundView
 )
@@ -28,6 +29,7 @@ urlpatterns = [
     path('order-summary/', OrderSummaryView.as_view(), name='order-summary'),
     path('remove-single-item-from-cart/<slug>/', remove_single_item_from_cart, name='remove-single-item-from-cart'),
     path('payment/',PaymentView.as_view(), name='payment'),
+    path('invoice/',InvoiceView.as_view(), name='invoice'),
     path('add-coupon/', AddCouponView.as_view(), name='add-coupon'),
     path('request-refund/',RequestRefundView.as_view(), name='request-refund'),
     path('search-expenses/', csrf_exempt(search_expenses),
