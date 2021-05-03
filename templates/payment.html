@@ -21,20 +21,24 @@
                 {% csrf_token %}
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="Credit or debit card" name="cardNumber" aria-label="Recipient's username"
-                    aria-describedby="button-addon2" required/>
-                  <button class="btn btn-outline-primary" id="stripeBtn" data-mdb-ripple-color="dark" style="padding: 0px 20px; margin-top: -2px;">
-                    Submit Payment
-                  </button>
-                </div>
-              </form>
-            </div>
+                  aria-describedby="button-addon2" required/>
+                  
+                <button class="btn btn-outline-primary" id="stripeBtn" data-mdb-ripple-color="dark" style="padding: 0px 20px; margin-top: -2px;">
+                  Submit Payment
+                </button>
+
+              </div>
+            </form>
+          </div>
             <!--/card 3 end-->
         </div>
         <!--/.Card-->
       </div>
+
    </div>
     <!--Grid row-->
   </div>
 </main>
   <!--Main layout-->
+ 
 {% endblock content %}

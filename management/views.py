@@ -77,19 +77,24 @@ def add_to_cart(request, slug):
         user=request.user,
         ordered=False
     )
+    
     order_qs = Order.objects.filter(user=request.user, ordered=False)
     if order_qs.exists():
         order = order_qs[0]
         # check if the order item is in the order
         if order.items.filter(item__slug=item.slug).exists():
-            order_item.quantity += 1
-            order_item.save()
-            messages.info(request, "This item quantity was updated!")
-            return redirect("ecommerce:order-summary")
+            if order_item.quantity+1 > item.current_stock:
+                messages.info(request, "This item quantity reached it's limit!")
+                return redirect("ecommerce:order-summary")
+            else:
+                order_item.quantity += 1
+                order_item.save()
+                messages.info(request, "This item quantity was updated!")
+                return redirect("ecommerce:order-summary")
         else:
             order.items.add(order_item)
             # this part is working
-            messages.info(request, "This item wass added to your cart.")
+            messages.info(request, "This item was added to your cart.")
             return redirect("ecommerce:order-summary")
     else:
         ordered_date = timezone.now()
@@ -116,7 +121,8 @@ def remove_to_cart(request, slug):
                 user=request.user,
                 ordered=False
             )[0]
-            order.items.remove(order_item)
+            # order.items.remove(order_item)
+            order_item.delete()
             messages.info(request, "This item was removed from your cart.")
             return redirect("ecommerce:order-summary")
         else:
@@ -147,7 +153,8 @@ def remove_single_item_from_cart(request, slug):
                 order_item.quantity -= 1
                 order_item.save()
             else:
-                order.items.remove(order_item)
+                # order.items.remove(order_item)
+                order_item.delete()
             messages.info(request, "This item quantit was updated.")
             return redirect("ecommerce:order-summary")
         else:
@@ -376,130 +383,39 @@ class PaymentView(View):
     # details about decoupling: https://pypi.org/project/python-decouple/
     # FOLLOW THIS LINK FOR decouple setup : https://www.youtube.com/watch?v=NRf1LeQju2g&ab_channel=ProfessionalCipher
     def post(self, request):
-        print("OK")
         order = Order.objects.get(user=self.request.user, ordered=False)
-        form = PaymentForm(self.request.POST)
-        payment = Payment
-        
         userprofile = UserProfile.objects.get(user=self.request.user)
-        print(userprofile)
 
         if request.method == 'POST':
-            print(request.POST['cardNumber'])
-            payment.stripe_charge_id = request.POST['cardNumber']
+            payment = Payment()
+            payment.stripe_charge_id = self.request.POST['cardNumber']
+            payment.user = self.request.user
+            payment.amount = int(order.get_total() * 100)
+            payment.save()
 
-        if form.is_valid():
-            token = form.cleaned_data.get('stripeToken')
-            save = form.cleaned_data.get('save')
-            use_default = form.cleaned_data.get('use_default')
+            userprofile.stripe_customer_id = self.request.POST['cardNumber']
+            userprofile.one_click_purchasing = True
+            userprofile.save()
 
-            if save:
-                if userprofile.stripe_customer_id != '' and userprofile.stripe_customer_id is not None:
-                    customer = stripe.Customer.retrieve(
-                        userprofile.stripe_customer_id)
-                    customer.sources.create(source=token)
 
-                else:
-                    customer = stripe.Customer.create(
-                        email=self.request.user.email)
-                    customer.sources.create(source=token)
-                    userprofile.stripe_customer_id = customer['id']
-                    userprofile.one_click_purchasing = True
-                    userprofile.save()
+            # assign the payment to the order
+            # order item update. after payment order item will reset again from 0.
+            order_items = order.items.all()
+            order_items.update(ordered=True)
+            for item in order_items:
+                item.save()
 
-            amount = int(order.get_total() * 100)
-            # error handling part start
-            # https://stripe.com/docs/testing
-            # link: of stripe error handling: https://stripe.com/docs/api/errors/handling?lang=python
-            try:
-                if use_default or save:
-                    # charge the customer because we cannot charge the token more than once
-                    charge = stripe.Charge.create(
-                        amount=amount,  # cents
-                        currency="usd",
-                        customer=userprofile.stripe_customer_id
-                    )
-                else:
-                    charge = stripe.Charge.create(
-                        amount=amount,  # dolar in cents so multipli by 100 for 2000
-                        currency="usd",
-                        source=token
-                        #description="My First Test Charge (created for API docs)",
-                    )
-                # create the payment
-                payment = Payment()
-                payment.stripe_charge_id = charge['id']
-                payment.user = self.request.user
-                payment.amount = order.get_total()
-                payment.save()
+            order.ordered = True
+            order.payment = payment
+            order.ref_code = create_ref_code()
+            order.save()
 
-                # assign the payment to the order
-                # order item update. after payment order item will reset again from 0.
-                order_items = order.items.all()
-                order_items.update(ordered=True)
-                for item in order_items:
-                    item.save()
-
-                order.ordered = True
-                order.payment = payment
-                order.ref_code = create_ref_code()
-                order.save()
-                messages.success(self.request, "Your order was successful!")
-                return redirect("/")
-
-            except stripe.error.CardError as e:
-                # Since it's a decline, stripe.error.CardError will be caught
-                body = e.json_body
-                err = body.get('error', {})
-                messages.warning(self.request, f"{err.get('message')}")
-                messages.success(self.request, "Your order was successful!")
-                return redirect("/")
-                '''
-                print('Status is: %s' % e.http_status)
-                print('Type is: %s' % e.error.type)
-                print('Code is: %s' % e.error.code)
-                # param is '' in this case
-                print('Param is: %s' % e.error.param)
-                print('Message is: %s' % e.error.message)
-                '''
-            # check if any error ocours during payment redirect: https://stripe.com/docs/api/errors
-            except stripe.error.RateLimitError as e:
-                # Too many requests made to the API too quickly
-                messages.warning(self.request, "Rate limit error")
-                return redirect("/")
-
-            except stripe.error.InvalidRequestError as e:
-                # Invalid parameters were supplied to Stripe's API
-                messages.warning(self.request, "Invalid parameters")
-                return redirect("/")
-
-            except stripe.error.AuthenticationError as e:
-                # Authentication with Stripe's API failed
-                # (maybe you changed API keys recently)
-                # this error happend if not valid API key provided
-                messages.warning(self.request, "Not authenticated")
-                return redirect("/")
-
-            except stripe.error.APIConnectionError as e:
-                # Network communication with Stripe failed
-                messages.warning(self.request, "Network error")
-                return redirect("/")
-
-            except stripe.error.StripeError as e:
-                # Display a very generic error to the user, and maybe send
-                # yourself an email
-                messages.warning(
-                    self.request, "Something went wrong. You were not charged. Please try again later.")
-                return redirect("/")
-
-            except Exception as e:
-                # send an email to ourselves
-                messages.warning(
-                    self.request, "A serious error occurred. We have been notified.")
-                return redirect("/")
+            messages.success(self.request, "Your order was successful!")
+            return redirect("/")
             # error end
-        messages.warning(self.request, "Invalid data received")
-        return redirect("/payment/stripe/")
+        else:
+            messages.warning(self.request, "Invalid data received")
+            return redirect("/")
 
 
 def get_coupon(request, code):
