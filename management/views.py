@@ -128,6 +128,14 @@ def remove_to_cart(request, slug):
             )[0]
             # order.items.remove(order_item)
             order_item.delete()
+            order_obj = Order.objects.filter(
+                user=request.user,
+                ordered=False
+            )[0]
+            if order_obj.items.count() == 0:
+                print(order_obj.items.count())
+                order_obj.delete()
+                print("deleted")
             messages.info(request, "This item was removed from your cart.")
             return redirect("ecommerce:order-summary")
         else:

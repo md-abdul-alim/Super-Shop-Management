@@ -4,6 +4,7 @@ from django.shortcuts import reverse
 from django.db.models.signals import post_save
 from django.db.models import Sum
 import qrcode
+import uuid
 from io import BytesIO
 from django.core.files import File
 from PIL import Image, ImageDraw
@@ -234,7 +235,8 @@ class QrCode(models.Model):
         qr.add_data(self.name)
         qr.make(fit=False) # fit False stop system to fix image size it own.This is shortcut way. For advance control use [image_factory]
         img = qr.make_image(fill_color="black", back_color="white")
-        file_name = f'qr_code - {self.name}.png'
+        # file_name = f'qr_code - {self.name}.png'
+        file_name = 'qr-' + str(uuid.uuid4()) + '.png'
         buffer = BytesIO()
         img.save(buffer, 'PNG')
         self.qr_code.save(file_name, File(buffer), save = False)
