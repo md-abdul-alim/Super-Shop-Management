@@ -14,7 +14,8 @@ from .views import (
     invoice_view,
     qr_code_invoice_view,
     AddCouponView,
-    RequestRefundView
+    RequestRefundView,
+    invoice_QR_download
 )
 #from . import views
 
@@ -32,6 +33,7 @@ urlpatterns = [
     path('payment/',PaymentView.as_view(), name='payment'),
     path('invoice/<ref_code>/',invoice_view, name='invoice'),
     path('qr-code-invoice/<ref_code>',qr_code_invoice_view, name='qr-invoice'),
+    path('qr-code-download/<ref_code>',invoice_QR_download, name='qr-download'),
     # path('invoice/<ref_code>/',invoice_view, name='invoice'),
     path('add-coupon/', AddCouponView.as_view(), name='add-coupon'),
     path('request-refund/',RequestRefundView.as_view(), name='request-refund'),

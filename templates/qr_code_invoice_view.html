@@ -8,8 +8,20 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
-    <div class="text-center">
-        <img src="{{order_object.qr_invoice.url}}" class="rounded" alt="Responsive image"/>
+    <div class="container">
+        <div class="text-center">
+            <div style="padding-top: 30px;">
+                <img src="{{order_object.qr_invoice.url}}" class="rounded" alt="Responsive image"/>
+            </div>
+            <div class="btn-group" style="padding-top: 15px;">
+                <a href="{% url 'ecommerce:home' %}" class="btn btn-secondary" style="margin-right: 9px; color: white;" >Back to home</a>
+                <a href="{% url 'ecommerce:qr-download' order_object.ref_code%}" class="btn btn-secondary" style="margin-right: 9px;color: white;">Complex QR Download</a>
+                <a href="{{ order_object.qr_invoice.url}}" class="btn btn-secondary" style="margin-right: 9px; color: white;" download>One Click QR Download</a>
+                <a href="{{ order_object.qr_invoice.url}}" class="btn btn-secondary" style="color: white;">One Click QR View</a>
+            </div>
+        </div>
+        
     </div>
+    
 </body>
 </html>

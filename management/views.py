@@ -1,21 +1,28 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, DetailView, View
-from .models import Item, OrderItem, Order, Address, Payment, Coupon, Refund, UserProfile
-from .forms import CheckoutForm, CouponForm, RefundForm, PaymentForm
 import json
-from django.http import JsonResponse, HttpResponse
+import os
+import random
+import string
+import mimetypes
+
+import uuid
+import magic
+import stripe
 # Create your views here.
 # payment link: https://stripe.com/docs/api/charges/create?lang=python
 from django.conf import settings
-import random
-import string
-import stripe
-from django.http import request
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, JsonResponse, request, response
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.views.generic import DetailView, ListView, View
+
+from .forms import CheckoutForm, CouponForm, PaymentForm, RefundForm
+from .models import (Address, Coupon, Item, Order, OrderItem, Payment, Refund,
+                     UserProfile)
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 # "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
 # `source` is obtained with Stripe.js; see https://stripe.com/docs/payments/accept-a-payment-charges#web-create-token
@@ -73,6 +80,30 @@ def qr_code_invoice_view(request, ref_code):
     }
     return render(request, 'qr_code_invoice_view.html', context)
 
+import requests # to get image from the web
+import shutil # to save it locally
+def invoice_QR_download(request, ref_code):
+    # '''
+    #     https://towardsdatascience.com/how-to-download-an-image-using-python-38a75cfa21c
+    #     https://stackoverflow.com/questions/36392510/django-download-a-file/36394206
+    #     https://www.w3schools.com/tags/att_a_download.asp
+    # '''
+    ord_obj = Order.objects.get(ref_code = ref_code)
+    print("model image:",ord_obj.qr_invoice)
+    image_url = "http://127.0.0.1:8000/media/qr_codes/qr-301eb5e1-188d-4577-acac-8947437a1ad9.png"
+
+    # Open the url image, set stream to True, this will return the stream content.
+    r = requests.get(image_url, stream = True)
+
+    filename = image_url.split("/")[-1]
+    ##OR
+    # filename = 'qr-' + str(uuid.uuid4()) + '.png'
+    response = HttpResponse(r, content_type="image/png")
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response
+
+
+    
 
 class ItemDetailView(DetailView):
     model = Item

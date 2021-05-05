@@ -208,6 +208,9 @@ class Order(models.Model):
         img.close()
         super().save(*args, **kwargs)
 
+    def get_image_url(self):
+        return reverse("ecommerce:qr-download", kwargs={"url": self.qr_invoice})
+
 
 class Refund(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -224,23 +227,6 @@ class QrCode(models.Model):
 
     def __str__(self):
         return str(self.name)
-
-    '''
-        First on also work but can not control for more data. it a problem of Pillow.
-        Link 1: https://github.com/odoo/odoo/issues/14927
-        Link 2: https://stackoverflow.com/questions/65137142/valueerror-cannot-determine-region-size-use-4-item-box
-    '''
-    # def save(self, *args, **kwargs):
-    #     qrcode_img = qrcode.make(self.name)
-    #     canvas = Image.new('RGB', (400, 400), 'white')
-    #     draw = ImageDraw.Draw(canvas)
-    #     canvas.paste(qrcode_img)
-    #     fname = f'qr_code - {self.name}.png'
-    #     buffer = BytesIO()
-    #     canvas.save(buffer, 'PNG')
-    #     self.qr_code.save(fname, File(buffer), save = False)
-    #     canvas.close()
-    #     super().save(*args, **kwargs)
 
     '''
         https://pypi.org/project/qrcode/
