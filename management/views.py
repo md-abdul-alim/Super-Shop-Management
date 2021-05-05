@@ -83,21 +83,22 @@ def qr_code_invoice_view(request, ref_code):
 import requests # to get image from the web
 import shutil # to save it locally
 def invoice_QR_download(request, ref_code):
-    # '''
-    #     https://towardsdatascience.com/how-to-download-an-image-using-python-38a75cfa21c
-    #     https://stackoverflow.com/questions/36392510/django-download-a-file/36394206
-    #     https://www.w3schools.com/tags/att_a_download.asp
-    # '''
+    '''
+        https://towardsdatascience.com/how-to-download-an-image-using-python-38a75cfa21c
+        https://stackoverflow.com/questions/36392510/django-download-a-file/36394206
+        https://www.w3schools.com/tags/att_a_download.asp
+    '''
     ord_obj = Order.objects.get(ref_code = ref_code)
-    print("model image:",ord_obj.qr_invoice)
-    image_url = "http://127.0.0.1:8000/media/qr_codes/qr-301eb5e1-188d-4577-acac-8947437a1ad9.png"
+    # image_url = "http://127.0.0.1:8000/media/qr_codes/qr-301eb5e1-188d-4577-acac-8947437a1ad9.png"
+    image_url = "http://127.0.0.1:8000/media/"+str(ord_obj.qr_invoice)
 
     # Open the url image, set stream to True, this will return the stream content.
     r = requests.get(image_url, stream = True)
 
-    filename = image_url.split("/")[-1]
+    #filename = image_url.split("/")[-1]
+    # filename = image_url.split("/")[5]
     ##OR
-    # filename = 'qr-' + str(uuid.uuid4()) + '.png'
+    filename = 'qr-' + str(uuid.uuid4()) + '.png' #for security issue we will generate new name for qr code.
     response = HttpResponse(r, content_type="image/png")
     response['Content-Disposition'] = "attachment; filename=%s" % filename
     return response
