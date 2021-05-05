@@ -57,10 +57,21 @@ class HomeView(ListView):
     paginate_by = 4
     template_name = "home.html"
 
-class InvoiceView(ListView):
-    model = Item
-    paginate_by = 4
-    template_name = "invoice.html"
+def invoice_view(request, ref_code):
+    order_obj = Order.objects.get(ref_code = ref_code)
+    print(order_obj)
+    context = {
+        "order_object": order_obj.ref_code
+    }
+    return render(request, 'invoice.html', context)
+
+def qr_code_invoice_view(request, ref_code):
+    order_obj = Order.objects.get(ref_code = ref_code)
+    print(order_obj.qr_invoice.url)
+    context = {
+        "order_object": order_obj
+    }
+    return render(request, 'qr_code_invoice_view.html', context)
 
 
 class ItemDetailView(DetailView):
@@ -132,10 +143,9 @@ def remove_to_cart(request, slug):
                 user=request.user,
                 ordered=False
             )[0]
+            #TODO manytomany field data count done
             if order_obj.items.count() == 0:
-                print(order_obj.items.count())
                 order_obj.delete()
-                print("deleted")
             messages.info(request, "This item was removed from your cart.")
             return redirect("ecommerce:order-summary")
         else:
@@ -421,10 +431,12 @@ class PaymentView(View):
             order.ordered = True
             order.payment = payment
             order.ref_code = create_ref_code()
+            order.qr_code_invoice()
             order.save()
 
             messages.success(self.request, "Your order was successful!")
-            return redirect("ecommerce:invoice")
+            return redirect("ecommerce:invoice", ref_code = order.ref_code)
+            # return render(request, 'ecommerce:invoice',ref_id = order.ref_code)
             # error end
         else:
             messages.warning(self.request, "Invalid data received")

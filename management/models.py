@@ -165,6 +165,7 @@ class Order(models.Model):
     received = models.BooleanField(default=False)
     refund_requested = models.BooleanField(default=False)
     refund_granted = models.BooleanField(default=False)
+    qr_invoice = models.ImageField(upload_to = 'qr_codes', blank=True)
 
     '''
     1. Item added to cart
@@ -187,6 +188,25 @@ class Order(models.Model):
         if self.coupon:
             total -= self.coupon.amount
         return total
+
+    def qr_code_invoice(self, *args, **kwargs):
+        qr = qrcode.QRCode(
+            version=5, # Control image size
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=5, # Control image size
+            border=3, # This control the outside padding of the image
+        )
+        qr_code_data = f'Customer Name: {self.user.username}, Order Ref Code: {self.ref_code}'
+        qr.add_data(qr_code_data)
+        qr.make(fit=False) # fit False stop system to fix image size it own.This is shortcut way. For advance control use [image_factory]
+        img = qr.make_image(fill_color="black", back_color="white")
+        # file_name = f'qr_code - {self.name}.png'
+        file_name = 'qr-' + str(uuid.uuid4()) + '.png'
+        buffer = BytesIO()
+        img.save(buffer, 'PNG')
+        self.qr_invoice.save(file_name, File(buffer), save = False)
+        img.close()
+        super().save(*args, **kwargs)
 
 
 class Refund(models.Model):
