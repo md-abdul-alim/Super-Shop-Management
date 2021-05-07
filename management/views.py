@@ -18,11 +18,11 @@ from django.http import HttpResponse, JsonResponse, request, response
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic import DetailView, ListView, View
-
+from django.template.loader import render_to_string, get_template
 from .forms import CheckoutForm, CouponForm, PaymentForm, RefundForm
 from .models import (Address, Coupon, Item, Order, OrderItem, Payment, Refund,
                      UserProfile)
-
+import pdfkit
 stripe.api_key = settings.STRIPE_SECRET_KEY
 # "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
 # `source` is obtained with Stripe.js; see https://stripe.com/docs/payments/accept-a-payment-charges#web-create-token
@@ -104,7 +104,43 @@ def invoice_QR_download(request, ref_code):
     return response
 
 
+def pdf_invoice_view(request, ref_code):
+
+    try:
+        order = Order.objects.get(user=request.user, ordered=True, ref_code = ref_code)
+        context = {
+            'object': order
+        }
+        return render(request, 'pdf_invoice_view.html', context)
+    except ObjectDoesNotExist:
+        messages.warning(request, "You do not have an pdf invoice")
+        return redirect("/")
+    # order_obj = Order.objects.get(ref_code = ref_code)
+    # print(order_obj.qr_invoice.url)
+    # context = {
+    #     "order_object": order_obj
+    # }
+    # return render(request, 'pdf_invoice_view.html', context)
+from supershop import settings
+
+def pdf_invoice_download(self, ref_code):
+    template = get_template('pdf_download.html')
+    object = Order.objects.get(ordered=True, ref_code = ref_code)
+    print(object.ref_code)
     
+    html = template.render({'object': object, 'MEDIA_BUCKET_URL_PREFIX': settings.MEDIA_BUCKET_URL_PREFIX})
+    options = {
+        'page-size': "A4",
+        'encoding': "UTF-8",
+        #"enable-local-file-access": None,
+        "viewport-size": "1024x768",
+    }
+
+    pdf_invoice = pdfkit.from_string(html, False, options=options)
+    filename = 'pdf-invoice-' + str(uuid.uuid4()) + '.pdf'
+    response = HttpResponse(pdf_invoice, content_type="application/pdf")
+    response['Content-Disposition'] = "attachment; filename=%s" % filename
+    return response
 
 class ItemDetailView(DetailView):
     model = Item

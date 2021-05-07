@@ -19,7 +19,7 @@
                             <a href="{% url 'ecommerce:qr-invoice' order_object %}" class="btn btn-secondary" style="margin-left: 45px;">
                                 QR Code Invoice
                             </a>
-                            <a class="btn btn-primary" style="float: right; margin-right: 45px;">PDF Invoice</a>
+                            <a href="{% url 'ecommerce:pdf-invoice' order_object %}" class="btn btn-primary" style="float: right; margin-right: 45px;">PDF Invoice</a>
                         </div>
                     </div>
                 </div>
