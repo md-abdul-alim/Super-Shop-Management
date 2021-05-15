@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+import django_heroku
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0!yz*f@2vwab4$u0j&1olw_4wa2bttofr_4i(ypxc$@3q*!#18
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['supershopmanagement.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -160,3 +160,5 @@ STRIPE_SECRET_KEY = 'STRIPE_TEST_SECRET_KEY'
 STRIPE_PUBLIC_KEY = 'STRIPE_TEST_PUBLIC_KEY'
 STRIPE_TEST_PUBLIC_KEY="sk_test_4eC39HqLfdg54rfdg4e534dr"
 STRIPE_TEST_SECRET_KEY="sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+
+django_heroku.settings(locals())
