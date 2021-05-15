@@ -2,10 +2,26 @@
 {% load static %}
 
 {% block branding %}
+{% if request.user.is_authenticated %}
+<div id="header">
+    <div id="branding">
+    
+<h1 id="site-name"><a href="/admin/">Django</a></h1>
+    </div>
+    <div id="user-tools">      
+            Welcome,
+            <strong>milon</strong>.         
+                <a href="/">View site</a> /      
+            <a href="/admin/password_change/">Change password</a> /           
+            <a href="/admin/logout/">Log out</a>       
+    </div>
+</div>
+{% else %}
 <h1 style="padding-bottom: 12px;">Supper Shop Admin Panel</h1>
 <h2 id="head" style="margin: -8px 0 8px 21px">
     <img src="{% static 'img/logo.jpg' %}"  alt="">  <!-- width="150" height="45" -->
 </h2>
+{% endif %}
 
 {% endblock %}
 

@@ -39,7 +39,7 @@
                   
                   {% for item in object_list %}
                   <tr scope="row">
-                    <td style="text-align: center;" >{{forloop.counter}}</td>
+                    <td style="text-align: center;" >{{item.id}}</td>
                     <td style="text-align: center;" >{{item.title}}</td>
                     <td style="text-align: center;" >{{item.price}}</td>
                     <td style="text-align: center;" >{{item.current_stock}}</td>

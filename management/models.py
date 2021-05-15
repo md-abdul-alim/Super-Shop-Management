@@ -82,7 +82,11 @@ CATEGORY_CHOICES = (
     ('Ow', 'Outwear'),
     ('P', 'Pant'),
     ('S', 'Shirt'),
-    ('SW', 'Sport wear')
+    ('SW', 'Sport wear'),
+    ('W', 'Watch'),
+    ('Fr', 'Fruit'),
+    ('C', 'Chocolet'),
+    ('Fo', 'Food')
 
 )
 LABEL_CHOICES = (
