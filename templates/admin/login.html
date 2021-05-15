@@ -1,0 +1,36 @@
+{% extends 'admin/login.html' %}
+{% load static %}
+
+{% block branding %}
+<h1 style="padding-bottom: 12px;">Shopper Shop Admin Panel</h1>
+<h2 id="head" style="margin: -8px 0 8px 21px">
+    <img src="{% static 'img/logo.jpg' %}"  alt="">  <!-- width="150" height="45" -->
+</h2>
+
+{% endblock %}
+
+{% block content %}
+<p style="margin: 0;padding: 0;">Default: [Username: <span style="color: purple;">milon</span> :: Password: <span style="color: peru;">adminmilon</span>]</p>
+      <!-- Content -->
+        <div id="content" class="colM">
+            <div id="content-main">
+                <form action="/admin/login/?next=/admin/" method="post" id="login-form"><input type="hidden" name="csrfmiddlewaretoken" value="ONp3oqW3UNzaLxNmLemiSV2XNpd5MWjMh6A0Zv2paWmpjwa0AhpANFOglWU7WooG">
+                    {% csrf_token %}
+                    <div class="form-row">
+                        <label class="required" for="id_username">Username:</label> <input type="text" name="username" autofocus="" autocapitalize="none" autocomplete="username" maxlength="150" required="" id="id_username">
+                    </div>
+                    <div class="form-row">
+                        <label class="required" for="id_password">Password:</label> <input type="password" name="password" autocomplete="current-password" required="" id="id_password">
+                        <input type="hidden" name="next" value="/admin/">
+                    </div>    
+                    <div class="submit-row">
+                        <input type="submit" value="Log in">
+                    </div>
+                </form>
+                <div class="submit-row">
+                    <a href="/accounts/login/" value="">Customer Log In</a>
+                </div>
+            </div>
+            <br class="clear">
+        </div>
+{% endblock %}
