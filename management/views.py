@@ -5,7 +5,6 @@ import string
 import mimetypes
 
 import uuid
-import magic
 import stripe
 # Create your views here.
 # payment link: https://stripe.com/docs/api/charges/create?lang=python
