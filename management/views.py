@@ -157,7 +157,8 @@ def pdf_invoice_download(self, ref_code):
         pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get(
             'WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
     elif platform.system() == "Linux":
-        pdf_invoice = pdfkit.from_string(html, False, options=options)
+        pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get(
+            'WKHTMLTOPDF_BINARY', '/usr/bin/wkhtmltopdf')) #https://www.odoo.com/forum/help-1/unable-to-find-wkhtmltopdf-on-this-system-the-report-will-be-shown-in-html-63900
     else:
         os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable)
         WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')],
