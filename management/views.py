@@ -140,15 +140,14 @@ def pdf_invoice_download(self, ref_code):
     import os, sys, subprocess, platform
 
     if platform.system() == "Windows":
+        print("in")
         pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
     else:
-        os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
-        WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], 
-            stdout=subprocess.PIPE).communicate()[0].strip()
+        WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], stdout=subprocess.PIPE).communicate()[0].strip()
         pdfkit_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
     pdf_invoice = pdfkit.from_string(html, False, options=options, configuration=pdfkit_config)
     ####################
-
+    ##OR: only for linux
     # pdf_invoice = pdfkit.from_string(html, False, options=options)
     filename = 'pdf-invoice-' + str(uuid.uuid4()) + '.pdf'
     response = HttpResponse(pdf_invoice, content_type="application/pdf")
