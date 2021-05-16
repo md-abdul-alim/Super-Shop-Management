@@ -1,3 +1,6 @@
+import requests  # to get image from the web
+from supershop import settings
+import shutil  # to save it locally
 import json
 import os
 import random
@@ -46,6 +49,7 @@ def products(request):
     }
     return render(request, "products.html", content)
 
+
 @login_required(login_url='login')
 def search_expenses(request):
     if request.method == 'POST':
@@ -58,47 +62,50 @@ def search_expenses(request):
         data = items.values()
         return JsonResponse(list(data), safe=False)
 
+
 class HomeView(ListView):
     model = Item
     paginate_by = 4
     template_name = "home.html"
 
+
 def invoice_view(request, ref_code):
-    order_obj = Order.objects.get(ref_code = ref_code)
+    order_obj = Order.objects.get(ref_code=ref_code)
     print(order_obj)
     context = {
         "order_object": order_obj.ref_code
     }
     return render(request, 'invoice.html', context)
 
+
 def qr_code_invoice_view(request, ref_code):
-    order_obj = Order.objects.get(ref_code = ref_code)
+    order_obj = Order.objects.get(ref_code=ref_code)
     print(order_obj.qr_invoice.url)
     context = {
         "order_object": order_obj
     }
     return render(request, 'qr_code_invoice_view.html', context)
 
-import requests # to get image from the web
-import shutil # to save it locally
+
 def invoice_QR_download(request, ref_code):
     '''
         https://towardsdatascience.com/how-to-download-an-image-using-python-38a75cfa21c
         https://stackoverflow.com/questions/36392510/django-download-a-file/36394206
         https://www.w3schools.com/tags/att_a_download.asp
     '''
-    ord_obj = Order.objects.get(ref_code = ref_code)
+    ord_obj = Order.objects.get(ref_code=ref_code)
     # image_url = "http://127.0.0.1:8000/media/qr_codes/qr-301eb5e1-188d-4577-acac-8947437a1ad9.png"
-    # image_url = "http://127.0.0.1:8000/media/"+str(ord_obj.qr_invoice)
-    image_url = "http://supershopmanagement.herokuapp.com/media/"+str(ord_obj.qr_invoice)
+    image_url = "http://127.0.0.1:8000/media/"+str(ord_obj.qr_invoice)
+    #image_url = "http://supershopmanagement.herokuapp.com/media/"+str(ord_obj.qr_invoice)
 
     # Open the url image, set stream to True, this will return the stream content.
-    r = requests.get(image_url, stream = True)
+    r = requests.get(image_url, stream=True)
 
     #filename = image_url.split("/")[-1]
     # filename = image_url.split("/")[5]
-    ##OR
-    filename = 'qr-' + str(uuid.uuid4()) + '.png' #for security issue we will generate new name for qr code.
+    # OR
+    # for security issue we will generate new name for qr code.
+    filename = 'qr-' + str(uuid.uuid4()) + '.png'
     response = HttpResponse(r, content_type="image/png")
     response['Content-Disposition'] = "attachment; filename=%s" % filename
     return response
@@ -107,7 +114,8 @@ def invoice_QR_download(request, ref_code):
 def pdf_invoice_view(request, ref_code):
 
     try:
-        order = Order.objects.get(user=request.user, ordered=True, ref_code = ref_code)
+        order = Order.objects.get(
+            user=request.user, ordered=True, ref_code=ref_code)
         context = {
             'object': order
         }
@@ -115,53 +123,62 @@ def pdf_invoice_view(request, ref_code):
     except ObjectDoesNotExist:
         messages.warning(request, "You do not have an pdf invoice")
         return redirect("/")
+
     # order_obj = Order.objects.get(ref_code = ref_code)
     # print(order_obj.qr_invoice.url)
     # context = {
     #     "order_object": order_obj
     # }
     # return render(request, 'pdf_invoice_view.html', context)
-from supershop import settings
+
 
 def pdf_invoice_download(self, ref_code):
     template = get_template('pdf_download.html')
-    object = Order.objects.get(ordered=True, ref_code = ref_code)
+    object = Order.objects.get(ordered=True, ref_code=ref_code)
     print(object.ref_code)
-    
-    html = template.render({'object': object, 'MEDIA_BUCKET_URL_PREFIX': settings.MEDIA_BUCKET_URL_PREFIX})
+
+    html = template.render(
+        {'object': object, 'MEDIA_BUCKET_URL_PREFIX': settings.MEDIA_BUCKET_URL_PREFIX})
     options = {
         'page-size': "A4",
         'encoding': "UTF-8",
-        #"enable-local-file-access": None,
+        # "enable-local-file-access": None,
         "viewport-size": "1024x768",
     }
 
     ####################
     # https://stackoverflow.com/questions/54707110/how-to-get-wkhtmltopdf-working-on-heroku
-    import os, sys, subprocess, platform
+    import os
+    import sys
+    import subprocess
+    import platform
 
     if platform.system() == "Windows":
-        pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
+        pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get(
+            'WKHTMLTOPDF_BINARY', 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'))
     elif platform.system() == "Linux":
         pdf_invoice = pdfkit.from_string(html, False, options=options)
     else:
-        os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
-        WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], 
-            stdout=subprocess.PIPE).communicate()[0].strip()
+        os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable)
+        WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')],
+                                           stdout=subprocess.PIPE).communicate()[0].strip()
         pdfkit_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)
 
-    pdf_invoice = pdfkit.from_string(html, False, options=options, configuration=pdfkit_config)
+    pdf_invoice = pdfkit.from_string(
+        html, False, options=options, configuration=pdfkit_config)
     ####################
-    ##OR: only for linux
+    # OR: only for linux
     # pdf_invoice = pdfkit.from_string(html, False, options=options)
     filename = 'pdf-invoice-' + str(uuid.uuid4()) + '.pdf'
     response = HttpResponse(pdf_invoice, content_type="application/pdf")
     response['Content-Disposition'] = "attachment; filename=%s" % filename
     return response
 
+
 class ItemDetailView(DetailView):
     model = Item
     template_name = "product.html"
+
 
 @login_required(login_url='login')
 def product_delete(request, id):
@@ -169,6 +186,7 @@ def product_delete(request, id):
     item.delete()
     messages.success(request, 'Product Deleted')
     return redirect("ecommerce:home")
+
 
 @login_required
 def add_to_cart(request, slug):
@@ -185,7 +203,8 @@ def add_to_cart(request, slug):
         # check if the order item is in the order
         if order.items.filter(item__slug=item.slug).exists():
             if order_item.quantity+1 > item.current_stock:
-                messages.info(request, "This item quantity reached it's limit!")
+                messages.info(
+                    request, "This item quantity reached it's limit!")
                 return redirect("ecommerce:order-summary")
             else:
                 order_item.quantity += 1
@@ -228,7 +247,7 @@ def remove_to_cart(request, slug):
                 user=request.user,
                 ordered=False
             )[0]
-            #TODO manytomany field data count done
+            # TODO manytomany field data count done
             if order_obj.items.count() == 0:
                 order_obj.delete()
             messages.info(request, "This item was removed from your cart.")
@@ -480,7 +499,8 @@ class PaymentView(View):
                 'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
             }
             # https://stackoverflow.com/questions/36317816/relatedobjectdoesnotexist-user-has-no-userprofile
-            userprofile, created = UserProfile.objects.get_or_create(user=self.request.user)
+            userprofile, created = UserProfile.objects.get_or_create(
+                user=self.request.user)
 
             return render(self.request, "payment.html", context)
         else:
@@ -505,7 +525,6 @@ class PaymentView(View):
             userprofile.one_click_purchasing = True
             userprofile.save()
 
-
             # assign the payment to the order
             # order item update. after payment order item will reset again from 0.
             order_items = order.items.all()
@@ -520,12 +539,13 @@ class PaymentView(View):
             order.save()
 
             messages.success(self.request, "Your order was successful!")
-            return redirect("ecommerce:invoice", ref_code = order.ref_code)
+            return redirect("ecommerce:invoice", ref_code=order.ref_code)
             # return render(request, 'ecommerce:invoice',ref_id = order.ref_code)
             # error end
         else:
             messages.warning(self.request, "Invalid data received")
             return redirect("/")
+
 
 class AddCouponView(View):
     def post(self, *args, **kwargs):
