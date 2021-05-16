@@ -89,7 +89,8 @@ def invoice_QR_download(request, ref_code):
     '''
     ord_obj = Order.objects.get(ref_code = ref_code)
     # image_url = "http://127.0.0.1:8000/media/qr_codes/qr-301eb5e1-188d-4577-acac-8947437a1ad9.png"
-    image_url = "http://127.0.0.1:8000/media/"+str(ord_obj.qr_invoice)
+    # image_url = "http://127.0.0.1:8000/media/"+str(ord_obj.qr_invoice)
+    image_url = "http://supershopmanagement.herokuapp.com/media/"+str(ord_obj.qr_invoice)
 
     # Open the url image, set stream to True, this will return the stream content.
     r = requests.get(image_url, stream = True)
