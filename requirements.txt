@@ -39,3 +39,4 @@ typing-extensions==3.7.4.3
 urllib3==1.26.2
 whitenoise==5.2.0
 wkhtmltopdf-pack-ng==0.12.3.0
+wkhtmltopdf-pack==0.12.3.0 
